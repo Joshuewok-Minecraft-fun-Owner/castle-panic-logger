@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Castle Panic Logger</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>Castle Panic Game Logger</h2>
+
+<textarea id="scriptInput" placeholder="Paste your Castle Panic script..."></textarea>
+<button id="saveBtn">Save Game</button>
+
+<div id="authSection" style="display:none;">
+  <p>You must sign in with GitHub to save games.</p>
+  <button id="authBtn">Sign in with GitHub</button>
+</div>
+
+<h3>Saved Games</h3>
+<ul id="gameList"></ul>
+
+<div id="viewer" style="display:none;">
+  <h3 id="viewerTitle"></h3>
+  <pre id="viewerContent"></pre>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
