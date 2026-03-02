@@ -6,40 +6,176 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 700px;
-      margin: 20px auto;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-    textarea {
-      width: 100%;
-      height: 150px;
-      margin-bottom: 10px;
+    header {
+      padding: 10px 20px;
+      background: #222;
+      color: #fff;
     }
-    button {
-      padding: 8px 12px;
-      margin-bottom: 20px;
-    }
-    #viewer {
-      margin-top: 20px;
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 220px 1fr 220px;
+      gap: 10px;
       padding: 10px;
-      background: #f4f4f4;
-      white-space: pre-wrap;
+      box-sizing: border-box;
+    }
+    #gameList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+    #gameList li button {
+      width: 100%;
+      text-align: left;
+      padding: 6px 8px;
+      margin-bottom: 4px;
+      border: 1px solid #ccc;
+      background: #f7f7f7;
+      cursor: pointer;
+    }
+    #boardContainer {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    #board {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 2px;
+      background: #222;
+      padding: 4px;
+      border-radius: 8px;
+    }
+    .cell {
+      position: relative;
+      background: #333;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .cell-inner {
+      position: absolute;
+      inset: 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #fff;
+      opacity: 0.4;
+    }
+    .ring-4 { background: #2f4f4f; } /* Forest */
+    .ring-3 { background: #355c7d; } /* Archer */
+    .ring-2 { background: #6c5b7b; } /* Knight */
+    .ring-1 { background: #c06c84; } /* Swordsman/Castle */
+    .monster {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 0 6px rgba(0,0,0,0.6);
+      animation: pop 0.2s ease-out;
+    }
+    .monster.GOBLIN { background: #4caf50; }
+    .monster.ORC    { background: #ff9800; }
+    .monster.TROLL  { background: #f44336; }
+    .monster.dead   { filter: grayscale(1); opacity: 0.4; }
+
+    @keyframes pop {
+      from { transform: scale(0.4); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    #controls {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    #controls button {
+      padding: 4px 8px;
+    }
+    #stepLabel {
+      font-size: 12px;
+      color: #555;
+    }
+
+    #scriptArea {
+      margin-top: 8px;
+      width: 100%;
+      height: 120px;
+    }
+
+    #keyPanel {
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    #keyPanel h3 {
+      margin-top: 0;
+    }
+    #keyPanel ul {
+      padding-left: 18px;
     }
   </style>
 </head>
 <body>
 
-<h2>Castle Panic Game Logger</h2>
+<header>
+  <h2>Castle Panic Game Logger</h2>
+</header>
 
-<textarea id="scriptInput" placeholder="Paste your Castle Panic script..."></textarea>
-<button id="saveBtn">Save Game</button>
+<main>
+  <!-- LEFT: Game list + new game -->
+  <section>
+    <h3>Games</h3>
+    <textarea id="scriptInput" placeholder="Paste your Castle Panic script..."></textarea>
+    <button id="saveBtn">Save Game</button>
+    <ul id="gameList"></ul>
+  </section>
 
-<h3>Saved Games</h3>
-<ul id="gameList"></ul>
+  <!-- CENTER: Board + controls + script viewer -->
+  <section id="boardContainer">
+    <div id="board"></div>
+    <div id="controls">
+      <button id="playBtn">Play</button>
+      <button id="prevBtn">Prev</button>
+      <button id="nextBtn">Next</button>
+      <span id="stepLabel">Step: 0 / 0</span>
+    </div>
+    <textarea id="scriptViewer" readonly></textarea>
+  </section>
 
-<div id="viewer" style="display:none;">
-  <h3 id="viewerTitle"></h3>
-  <pre id="viewerContent"></pre>
-</div>
+  <!-- RIGHT: Key / legend -->
+  <section id="keyPanel">
+    <h3>Key</h3>
+    <ul>
+      <li><b>Rings:</b> 4 = Forest, 3 = Archer, 2 = Knight, 1 = Castle</li>
+      <li><b>Monsters:</b> GOBLIN (green), ORC (orange), TROLL (red)</li>
+      <li><b>Script commands:</b></li>
+    </ul>
+    <pre>
+SPAWN sector ring type id?
+  e.g. SPAWN 3 4 GOBLIN m1
+
+MOVE id sector ring
+  e.g. MOVE m1 3 3
+
+HIT id
+  (marks monster dead)
+
+DESTROY sector ring
+  (marks cell as destroyed)
+    </pre>
+  </section>
+</main>
 
 <script type="module" src="script.js"></script>
 </body>
