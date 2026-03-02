@@ -3,7 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <title>Castle Panic Logger</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 20px auto;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 8px 12px;
+      margin-bottom: 20px;
+    }
+    #viewer {
+      margin-top: 20px;
+      padding: 10px;
+      background: #f4f4f4;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
 <body>
 
@@ -11,11 +32,6 @@
 
 <textarea id="scriptInput" placeholder="Paste your Castle Panic script..."></textarea>
 <button id="saveBtn">Save Game</button>
-
-<div id="authSection" style="display:none;">
-  <p>You must sign in with GitHub to save games.</p>
-  <button id="authBtn">Sign in with GitHub</button>
-</div>
 
 <h3>Saved Games</h3>
 <ul id="gameList"></ul>
@@ -25,6 +41,6 @@
   <pre id="viewerContent"></pre>
 </div>
 
-<script src="script.js"></script>
+<script type="module" src="script.js"></script>
 </body>
 </html>
