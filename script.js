@@ -1,111 +1,92 @@
-const repoOwner = "Joshuewok-Minecraft-fun-Owner";
-const repoName = "castle-panic-logger";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push, set, get, child }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-let accessToken = null;
+// -----------------------------
+// 1. Your Firebase Config
+// -----------------------------
+const firebaseConfig = {
+    apiKey: "AIzaSyDOx-M9awleDzmGRZrnOFeLHODq2asHjfc",
+    authDomain: "castle-panic-logger.firebaseapp.com",
+    databaseURL: "https://castle-panic-logger-default-rtdb.firebaseio.com",
+    projectId: "castle-panic-logger",
+    storageBucket: "castle-panic-logger.firebasestorage.app",
+    messagingSenderId: "1093196906880",
+    appId: "1:1093196906880:web:bfb6a4450e723b72ad0165",
+    measurementId: "G-B689DBWYPG"
+};
 
-// ---------------------------
-// OAuth Device Flow
-// ---------------------------
-async function startOAuth() {
-  const res = await fetch("https://github.com/login/device/code", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Accept": "application/json" },
-    body: JSON.stringify({
-      client_id: "Ov23lin8MD5Weh0M48Z6",
-      scope: "repo"
-    })
-  });
+// -----------------------------
+// 2. Init Firebase
+// -----------------------------
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-  const data = await res.json();
-  alert("Go to " + data.verification_uri + " and enter code: " + data.user_code);
-
-  pollForToken(data);
-}
-
-async function pollForToken(deviceData) {
-  const interval = setInterval(async () => {
-    const res = await fetch("https://github.com/login/oauth/access_token", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify({
-        client_id: "Ov23lin8MD5Weh0M48Z6",
-        device_code: deviceData.device_code,
-        grant_type: "urn:ietf:params:oauth:grant-type:device_code"
-      })
-    });
-
-    const data = await res.json();
-
-    if (data.access_token) {
-      clearInterval(interval);
-      accessToken = data.access_token;
-      document.getElementById("authSection").style.display = "none";
-      loadGames();
-    }
-  }, deviceData.interval * 1000);
-}
-
-// ---------------------------
-// Create a new Game Issue
-// ---------------------------
+// -----------------------------
+// 3. Save Game
+// -----------------------------
 async function saveGame() {
-  if (!accessToken) {
-    document.getElementById("authSection").style.display = "block";
+  const script = document.getElementById("scriptInput").value.trim();
+  if (!script) {
+    alert("Enter a script first!");
     return;
   }
 
-  const script = document.getElementById("scriptInput").value.trim();
-  if (!script) return alert("Enter a script first!");
+  const gamesRef = ref(db, "games");
+  const newGameRef = push(gamesRef);
 
-  await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/issues`, {
-    method: "POST",
-    headers: {
-      "Authorization": "Bearer " + accessToken,
-      "Accept": "application/vnd.github+json"
-    },
-    body: JSON.stringify({
-      title: "Castle Panic Game",
-      body: script
-    })
+  await set(newGameRef, {
+    script: script,
+    timestamp: Date.now()
   });
 
   document.getElementById("scriptInput").value = "";
   loadGames();
 }
 
-// ---------------------------
-// Load all issues (games)
-// ---------------------------
+// -----------------------------
+// 4. Load Games
+// -----------------------------
 async function loadGames() {
-  const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/issues`);
-  const issues = await res.json();
+  const dbRef = ref(db);
+  const snapshot = await get(child(dbRef, "games"));
 
   const list = document.getElementById("gameList");
   list.innerHTML = "";
 
-  issues.forEach(issue => {
+  if (!snapshot.exists()) return;
+
+  const games = snapshot.val();
+  const keys = Object.keys(games);
+
+  keys.forEach((key, index) => {
     const li = document.createElement("li");
-    li.innerHTML = `<button onclick="viewGame(${issue.number})">Game #${issue.number}</button>`;
+    li.innerHTML = `<button onclick="viewGame('${key}', ${index + 1})">Game #${index + 1}</button>`;
     list.appendChild(li);
   });
 }
 
-// ---------------------------
-// View a single game
-// ---------------------------
-async function viewGame(num) {
-  const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/issues/${num}`);
-  const issue = await res.json();
+// -----------------------------
+// 5. View Game
+// -----------------------------
+async function viewGame(id, num) {
+  const dbRef = ref(db);
+  const snapshot = await get(child(dbRef, "games/" + id));
+
+  if (!snapshot.exists()) return;
+
+  const data = snapshot.val();
 
   document.getElementById("viewerTitle").innerText = "Game #" + num;
-  document.getElementById("viewerContent").innerText = issue.body;
+  document.getElementById("viewerContent").innerText = data.script;
   document.getElementById("viewer").style.display = "block";
 }
 
-// ---------------------------
-// Event Listeners
-// ---------------------------
+// -----------------------------
+// 6. Hook up buttons
+// -----------------------------
 document.getElementById("saveBtn").onclick = saveGame;
-document.getElementById("authBtn").onclick = startOAuth;
+window.viewGame = viewGame;
 
+// Load on start
 loadGames();
