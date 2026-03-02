@@ -11,7 +11,7 @@ async function startOAuth() {
     method: "POST",
     headers: { "Content-Type": "application/json", "Accept": "application/json" },
     body: JSON.stringify({
-      client_id: "Iv1.INSERT_YOUR_CLIENT_ID",
+      client_id: "Ov23lin8MD5Weh0M48Z6",
       scope: "repo"
     })
   });
@@ -28,7 +28,7 @@ async function pollForToken(deviceData) {
       method: "POST",
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
       body: JSON.stringify({
-        client_id: "Iv1.INSERT_YOUR_CLIENT_ID",
+        client_id: "Ov23lin8MD5Weh0M48Z6",
         device_code: deviceData.device_code,
         grant_type: "urn:ietf:params:oauth:grant-type:device_code"
       })
